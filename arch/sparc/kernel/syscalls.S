@@ -189,8 +189,7 @@ linux_sparc_syscall32:
 	 mov	%i0, %l5				! IEU1
 5:	call	%l7					! CTI	Group brk forced
 	 srl	%i5, 0, %o5				! IEU1
-	ba,pt	%xcc, 3f
-	 sra	%o0, 0, %o0
+	ba,a,pt	%xcc, 3f
 
 	/* Linux native system calls enter here... */
 	.align	32
