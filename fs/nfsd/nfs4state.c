@@ -376,6 +376,7 @@ alloc_init_deleg(struct nfs4_client *clp, struct nfs4_ol_stateid *stp, struct sv
 	 */
 	if (type != NFS4_OPEN_DELEGATE_READ)
 		return NULL;
+	
 	if (num_delegations > max_delegations)
 		return NULL;
 	dp = delegstateid(nfs4_alloc_stid(clp, deleg_slab));
@@ -393,7 +394,7 @@ alloc_init_deleg(struct nfs4_client *clp, struct nfs4_ol_stateid *stp, struct sv
 	INIT_LIST_HEAD(&dp->dl_perclnt);
 	INIT_LIST_HEAD(&dp->dl_recall_lru);
 	dp->dl_file = NULL;
-	dp->dl_type = type;
+	dp->dl_type = NFS4_OPEN_DELEGATE_READ;
 	fh_copy_shallow(&dp->dl_fh, &current_fh->fh_handle);
 	dp->dl_time = 0;
 	atomic_set(&dp->dl_count, 1);
@@ -2961,7 +2962,8 @@ static int nfs4_setlease(struct nfs4_delegation *dp, int flag)
 	return 0;
 }
 
-static int nfs4_set_delegation(struct nfs4_delegation *dp, int flag, struct nfs4_file *fp)
+
+static int nfs4_set_delegation(struct nfs4_delegation *dp, struct nfs4_file *fp)
 {
 	int status;
 
@@ -2970,7 +2972,7 @@ static int nfs4_set_delegation(struct nfs4_delegation *dp, int flag, struct nfs4
 	get_nfs4_file(fp);
 	dp->dl_file = fp;
 	if (!fp->fi_lease) {
-		status = nfs4_setlease(dp, flag);
+		status = nfs4_setlease(dp);
 		if (status)
 			goto out_free;
 		return 0;
@@ -3055,7 +3057,7 @@ nfs4_open_delegation(struct net *net, struct svc_fh *fh,
 	dp = alloc_init_deleg(oo->oo_owner.so_client, stp, fh, flag);
 	if (dp == NULL)
 		goto out_no_deleg;
-	status = nfs4_set_delegation(dp, flag, stp->st_file);
+	status = nfs4_set_delegation(dp, stp->st_file);
 	if (status)
 		goto out_free;
 
