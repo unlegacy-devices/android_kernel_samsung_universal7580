@@ -940,7 +940,7 @@ static int shmctl_nolock(struct ipc_namespace *ns, int shmid,
 	}
 
 out_unlock:
-	shm_unlock(shp);
+	rcu_read_unlock();
 out:
 	return err;
 }
