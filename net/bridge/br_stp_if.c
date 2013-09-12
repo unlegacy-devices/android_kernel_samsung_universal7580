@@ -128,16 +128,13 @@ static void br_stp_start(struct net_bridge *br)
 	char *argv[] = { BR_STP_PROG, br->dev->name, "start", NULL };
 	char *envp[] = { NULL };
 
-	if (net_eq(dev_net(br->dev), &init_net))
-		r = call_usermodehelper(BR_STP_PROG, argv, envp, UMH_WAIT_PROC);
-	else
-		r = -ENOENT;
-
+	r = call_usermodehelper(BR_STP_PROG, argv, envp, UMH_WAIT_PROC);
+	
 	spin_lock_bh(&br->lock);
 
 	if (br->bridge_forward_delay < BR_MIN_FORWARD_DELAY)
 		__br_set_forward_delay(br, BR_MIN_FORWARD_DELAY);
-	else if (br->bridge_forward_delay > BR_MAX_FORWARD_DELAY)
+	else if (br->bridge_forward_delay < BR_MAX_FORWARD_DELAY)
 		__br_set_forward_delay(br, BR_MAX_FORWARD_DELAY);
 
 	if (r == 0) {
