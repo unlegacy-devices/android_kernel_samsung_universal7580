@@ -2572,6 +2572,9 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	fuse_invalidate_attr(inode);
 
 out:
+	if (!(mode & FALLOC_FL_KEEP_SIZE))
+		clear_bit(FUSE_I_SIZE_UNSTABLE, &fi->state);
+
 	if (lock_inode)
 		mutex_unlock(&inode->i_mutex);
 
