@@ -297,6 +297,15 @@ static void sem_wait_array(struct sem_array *sma)
 	}
 }
 
+static void sem_rcu_free(struct rcu_head *head)
+{
+	struct ipc_rcu *p = container_of(head, struct ipc_rcu, rcu);
+	struct sem_array *sma = ipc_rcu_to_struct(p);
+
+	security_sem_free(sma);
+	ipc_rcu_free(head);
+}
+
 /*
  * If the request contains only one semaphore operation, and there are
  * no complex transactions pending, lock only the semaphore involved.
