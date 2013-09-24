@@ -327,8 +327,10 @@ static void read_dirty(struct closure *cl)
 		if (delay > 0 &&
 		    (KEY_START(&w->key) != dc->last_read ||
 		     jiffies_to_msecs(delay) > 50))
-			delay = schedule_timeout_uninterruptible(delay);
-
+			 jiffies_to_msecs(delay) > 50))
+			while (delay)
+				delay = schedule_timeout(delay);
+			
 		dc->last_read	= KEY_OFFSET(&w->key);
 
 		io = kzalloc(sizeof(struct dirty_io) + sizeof(struct bio_vec)
@@ -370,6 +372,43 @@ err:
 	 * freed) before refilling again
 	 */
 	continue_at(cl, refill_dirty, dirty_wq);
+}
+
+/* Init */
+
+static int bch_btree_sectors_dirty_init(struct btree *b, struct btree_op *op,
+					struct cached_dev *dc)
+{
+	struct bkey *k;
+	struct btree_iter iter;
+
+	bch_btree_iter_init(b, &iter, &KEY(dc->disk.id, 0, 0));
+	while ((k = bch_btree_iter_next_filter(&iter, b, bch_ptr_bad)))
+		if (!b->level) {
+			if (KEY_INODE(k) > dc->disk.id)
+				break;
+
+			if (KEY_DIRTY(k))
+				bcache_dev_sectors_dirty_add(b->c, dc->disk.id,
+							     KEY_START(k),
+							     KEY_SIZE(k));
+		} else {
+			btree(sectors_dirty_init, k, b, op, dc);
+			if (KEY_INODE(k) > dc->disk.id)
+				break;
+
+			cond_resched();
+		}
+
+	return 0;
+}
+
+void bch_sectors_dirty_init(struct cached_dev *dc)
+{
+	struct btree_op op;
+
+	bch_btree_op_init_stack(&op);
+	btree_root(sectors_dirty_init, dc->disk.c, &op, dc);
 }
 
 void bch_cached_dev_writeback_init(struct cached_dev *dc)
