@@ -955,18 +955,7 @@ static struct bkey *btree_sort_fixup(struct btree_iter *iter, struct bkey *tmp)
 		} else {
 			/* can't happen because of comparison func */
 			BUG_ON(!bkey_cmp(&START_KEY(top->k), &START_KEY(i->k)));
-
-			if (bkey_cmp(i->k, top->k) < 0) {
-				bkey_copy(tmp, top->k);
-
-				bch_cut_back(&START_KEY(i->k), tmp);
-				bch_cut_front(i->k, top->k);
-				heap_sift(iter, 0, btree_iter_cmp);
-
-				return tmp;
-			} else {
-				bch_cut_back(&START_KEY(i->k), top->k);
-			}
+			bch_cut_back(&START_KEY(i->k), top->k);
 		}
 	}
 
