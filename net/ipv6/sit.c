@@ -1589,7 +1589,10 @@ static int __net_init sit_init_net(struct net *net)
 	}
 	dev_net_set(sitn->fb_tunnel_dev, net);
 	sitn->fb_tunnel_dev->rtnl_link_ops = &sit_link_ops;
-
+	/* FB netdevice is special: we have one, and only one per netns.
+	 * Allowing to move it to another netns is clearly unsafe.
+	 */
+	sitn->fb_tunnel_dev->features |= NETIF_F_NETNS_LOCAL;
 	err = ipip6_fb_tunnel_init(sitn->fb_tunnel_dev);
 	if (err)
 		goto err_dev_free;
