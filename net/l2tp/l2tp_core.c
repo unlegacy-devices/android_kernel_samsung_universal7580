@@ -508,6 +508,7 @@ out:
 static inline int l2tp_verify_udp_checksum(struct sock *sk,
 					   struct sk_buff *skb)
 {
+	struct l2tp_tunnel *tunnel = (struct l2tp_tunnel *)sk->sk_user_data;
 	struct udphdr *uh = udp_hdr(skb);
 	u16 ulen = ntohs(uh->len);
 	__wsum psum;
@@ -516,7 +517,7 @@ static inline int l2tp_verify_udp_checksum(struct sock *sk,
 		return 0;
 
 #if IS_ENABLED(CONFIG_IPV6)
-	if (sk->sk_family == PF_INET6 && !l2tp_tunnel(sk)->v4mapped) {
+	if (sk->sk_family == PF_INET6 && !tunnel->v4mapped) {
 		if (!uh->check) {
 			LIMIT_NETDEBUG(KERN_INFO "L2TP: IPv6: checksum is 0\n");
 			return 1;
