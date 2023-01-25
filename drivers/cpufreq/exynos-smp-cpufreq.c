@@ -825,8 +825,13 @@ static int exynos_cpufreq_tmu_notifier(struct notifier_block *notifier,
 		if (ret) {
 			mutex_unlock(&exynos_cpu_lock);
 			return NOTIFY_BAD;
-			}
 		}
+	}
+
+out: __maybe_unused 
+	mutex_unlock(&exynos_cpu_lock);
+
+	return NOTIFY_OK;
 }
 
 static struct notifier_block exynos_tmu_nb = {
