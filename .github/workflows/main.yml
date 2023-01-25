@@ -19,7 +19,7 @@ jobs:
       run: |
         export KBUILD_BUILD_USER=notnoelchannel
         export KBUILD_BUILD_HOST=unlegacy-devices
-        make -j22 ARCH=arm64 lineageos_a3xelte_defconfig
+        make -j22 ARCH=arm64 lineageos_a3xelte-octa_defconfig
         make -j128
     - name: Moving Output # CI only
       run: |
