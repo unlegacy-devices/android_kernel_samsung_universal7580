@@ -11079,7 +11079,8 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0))
         wdev->wiphy->wowlan.max_pkt_offset = WL_WOWLAN_MAX_PATTERN_LEN;
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0) */
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0) */
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 12, 0) */
+#endif /* defined(CONFIG_PM) && defined(WL_CFG80211_P2P_DEV_IF) */
 
 	WL_DBG(("Registering custom regulatory)\n"));
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
