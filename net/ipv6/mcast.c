@@ -1153,7 +1153,7 @@ int igmp6_event_query(struct sk_buff *skb)
 		/* cancel the interface change timer */
 		idev->mc_ifc_count = 0;
 		if (del_timer(&idev->mc_ifc_timer))
-			__in6_dev_put(idev);
+			in6_dev_put(idev);
 		/* clear deleted report items */
 		mld_clear_delrec(idev);
 	} else if (len >= 28) {
@@ -2242,10 +2242,10 @@ void ipv6_mc_down(struct inet6_dev *idev)
 	read_lock_bh(&idev->lock);
 	idev->mc_ifc_count = 0;
 	if (del_timer(&idev->mc_ifc_timer))
-		__in6_dev_put(idev);
+		in6_dev_put(idev);
 	idev->mc_gq_running = 0;
 	if (del_timer(&idev->mc_gq_timer))
-		__in6_dev_put(idev);
+		in6_dev_put(idev);
 
 	for (i = idev->mc_list; i; i=i->next)
 		igmp6_group_dropped(i);
