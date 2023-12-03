@@ -940,7 +940,7 @@ static int shmctl_nolock(struct ipc_namespace *ns, int shmid,
 	}
 
 out_unlock:
-	shm_unlock(shp);
+	rcu_read_unlock();
 out:
 	return err;
 }
@@ -951,10 +951,8 @@ SYSCALL_DEFINE3(shmctl, int, shmid, int, cmd, struct shmid_ds __user *, buf)
 	int err, version;
 	struct ipc_namespace *ns;
 
-	if (cmd < 0 || shmid < 0) {
-		err = -EINVAL;
-		goto out;
-	}
+	if (cmd < 0 || shmid < 0)
+		return -EINVAL;
 
 	version = ipc_parse_version(&cmd);
 	ns = current->nsproxy->ipc_ns;
