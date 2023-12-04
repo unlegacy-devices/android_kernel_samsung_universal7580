@@ -663,8 +663,13 @@ void ip_tunnel_xmit(struct sk_buff *skb, struct net_device *dev,
 	if (skb->protocol == htons(ETH_P_IP))
 		df |= (inner_iph->frag_off&htons(IP_DF));
 
+<<<<<<< HEAD
+	max_headroom = LL_RESERVED_SPACE(tdev) + sizeof(struct iphdr)
+					       + rt->dst.header_len;
+=======
 	max_headroom = LL_RESERVED_SPACE(rt->dst.dev) + sizeof(struct iphdr)
 			+ rt->dst.header_len;
+>>>>>>> 0accb77476d (ip_tunnel: Fix a memory corruption in ip_tunnel_xmit)
 	if (max_headroom > dev->needed_headroom)
 		dev->needed_headroom = max_headroom;
 
@@ -677,11 +682,10 @@ void ip_tunnel_xmit(struct sk_buff *skb, struct net_device *dev,
 	skb_dst_drop(skb);
 	skb_dst_set(skb, &rt->dst);
 
-	err = iptunnel_xmit(rt, skb,
+	err = iptunnel_xmit(dev_net(dev), rt, skb,
 			    fl4.saddr, fl4.daddr, protocol,
 			    tos, ttl, df);
-
-	iptunnel_xmit_stats(err);
+	iptunnel_xmit_stats(err, &dev->stats, dev->tstats);
 
 	/* Push down and install the IP header. */
 	skb_push(skb, sizeof(struct iphdr));
