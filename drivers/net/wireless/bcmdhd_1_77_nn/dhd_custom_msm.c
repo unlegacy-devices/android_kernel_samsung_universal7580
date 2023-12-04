@@ -23,7 +23,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_custom_msm.c 674523 2016-12-09 04:05:27Z $
+ * $Id: dhd_custom_msm.c 713501 2017-07-31 08:57:20Z $
  *
  */
 
@@ -40,9 +40,10 @@
 #include <linux/fcntl.h>
 #include <linux/fs.h>
 #include <linux/of_gpio.h>
-#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998)
+#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
+	defined(CONFIG_ARCH_SDM845)
 #include <linux/msm_pcie.h>
-#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 */
+#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 || CONFIG_ARCH_SDM845 */
 
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
 extern int dhd_init_wlan_mem(void);
@@ -54,11 +55,12 @@ static int wlan_reg_on = -1;
 #define DHD_DT_COMPAT_ENTRY		"android,bcmdhd_wlan"
 #define WIFI_WL_REG_ON_PROPNAME		"wlan-en-gpio"
 
-#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998)
+#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
+	defined(CONFIG_ARCH_SDM845)
 #define MSM_PCIE_CH_NUM			0
 #else
 #define MSM_PCIE_CH_NUM			1
-#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 */
+#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 || CONFIG_ARCH_SDM845 */
 
 #ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
 static int wlan_host_wake_up = -1;
@@ -232,7 +234,8 @@ fail:
 	printk(KERN_INFO"%s: FINISH.......\n", __FUNCTION__);
 	return ret;
 }
-#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998)
+#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
+	defined(CONFIG_ARCH_SDM845)
 #if defined(CONFIG_DEFERRED_INITCALLS)
 deferred_module_init(dhd_wlan_init);
 #else
@@ -240,4 +243,4 @@ late_initcall(dhd_wlan_init);
 #endif /* CONFIG_DEFERRED_INITCALLS */
 #else
 device_initcall(dhd_wlan_init);
-#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 */
+#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 || CONFIG_ARCH_SDM845 */

@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: bcmevent.c 717454 2017-08-24 08:08:01Z $
+ * $Id: bcmevent.c 707287 2017-06-27 06:44:29Z $
  */
 
 #include <typedefs.h>

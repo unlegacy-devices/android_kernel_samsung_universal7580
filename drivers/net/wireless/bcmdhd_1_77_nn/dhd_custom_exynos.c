@@ -23,7 +23,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_custom_exynos.c 717405 2017-08-24 05:58:34Z $
+ * $Id: dhd_custom_exynos.c 713490 2017-07-31 07:27:48Z $
  */
 #include <linux/device.h>
 #include <linux/gpio.h>
@@ -92,13 +92,10 @@ extern struct device *mmc_dev_for_wlan;
 #ifdef EXYNOS_PCIE_RC_ONOFF
 #ifdef CONFIG_MACH_UNIVERSAL5433
 #define SAMSUNG_PCIE_CH_NUM
-#elif defined(CONFIG_MACH_UNIVERSAL7420)
+#elif defined(CONFIG_MACH_UNIVERSAL7420) || defined(CONFIG_MACH_EXSOM7420)
 #define SAMSUNG_PCIE_CH_NUM 1
-#elif defined(CONFIG_MACH_EXSOM7420)
-#define SAMSUNG_PCIE_CH_NUM 1
-#elif defined(CONFIG_SOC_EXYNOS8890)
-#define SAMSUNG_PCIE_CH_NUM 0
-#elif defined(CONFIG_SOC_EXYNOS8895)
+#elif defined(CONFIG_SOC_EXYNOS8890)|| defined(CONFIG_SOC_EXYNOS8895) || \
+	defined(CONFIG_SOC_EXYNOS9810)
 #define SAMSUNG_PCIE_CH_NUM 0
 #endif
 #ifdef CONFIG_MACH_UNIVERSAL5433
@@ -110,7 +107,7 @@ extern void exynos_pcie_poweroff(int);
 #endif /* CONFIG_MACH_UNIVERSAL5433 */
 #endif /* EXYNOS_PCIE_RC_ONOFF */
 
-#if (defined(CONFIG_MACH_UNIVERSAL3475) || defined(CONFIG_SOC_EXYNOS7870) || defined(CONFIG_MACH_UNIVERSAL7580))
+#if (defined(CONFIG_MACH_UNIVERSAL3475) || defined(CONFIG_SOC_EXYNOS7870))
 extern struct mmc_host *wlan_mmc;
 extern void mmc_ctrl_power(struct mmc_host *host, bool onoff);
 #endif /* CONFIG_MACH_UNIVERSAL3475 || CONFIG_SOC_EXYNOS7870 */
@@ -167,7 +164,7 @@ dhd_wlan_power(int onoff)
 			printk(KERN_INFO "%s WLAN SDIO GPIO control error\n", __FUNCTION__);
 	}
 #endif /* CONFIG_MACH_A7LTE */
-#if (defined(CONFIG_MACH_UNIVERSAL3475) || defined(CONFIG_SOC_EXYNOS7870) || defined(CONFIG_MACH_UNIVERSAL7580))
+#if (defined(CONFIG_MACH_UNIVERSAL3475) || defined(CONFIG_SOC_EXYNOS7870))
 	if (wlan_mmc)
 		mmc_ctrl_power(wlan_mmc, onoff);
 #endif /* CONFIG_MACH_UNIVERSAL3475 || CONFIG_SOC_EXYNOS7870 */
@@ -380,7 +377,7 @@ fail:
 }
 
 #if defined(CONFIG_MACH_UNIVERSAL7420) || defined(CONFIG_SOC_EXYNOS8890) || \
-	defined(CONFIG_SOC_EXYNOS8895)
+	defined(CONFIG_SOC_EXYNOS8895) || defined(CONFIG_SOC_EXYNOS9810)
 #if defined(CONFIG_DEFERRED_INITCALLS)
 deferred_module_init(dhd_wlan_init);
 #else
@@ -389,5 +386,5 @@ late_initcall(dhd_wlan_init);
 #else
 device_initcall(dhd_wlan_init);
 #endif /* CONFIG_MACH_UNIVERSAL7420 || CONFIG_SOC_EXYNOS8890 || \
-		  CONFIG_SOC_EXYNOS8895
+		  CONFIG_SOC_EXYNOS8895 || CONFIG_SOC_EXYNOS9810
 		*/

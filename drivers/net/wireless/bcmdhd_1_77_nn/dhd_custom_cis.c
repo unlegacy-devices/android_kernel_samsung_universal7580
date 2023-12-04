@@ -25,7 +25,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_custom_cis.c 699163 2017-05-12 05:18:23Z $
+ * $Id: dhd_custom_cis.c 714838 2017-08-08 08:40:40Z $
  */
 
 #include <typedefs.h>
@@ -728,6 +728,7 @@ vid_info_t vid_info[] = {
 	{ 3, { 0x71, 0x33, }, { "semco_sky_r01h_e32_b0" } },
 	{ 3, { 0x81, 0x33, }, { "semco_sem_r01i_e32_b0" } },
 	{ 3, { 0x82, 0x33, }, { "semco_sem_r02j_e32_b0" } },
+	{ 3, { 0x91, 0x33, }, { "semco_sem_r02a_e32a_b2" } },
 	{ 3, { 0x12, 0x22, }, { "murata_nxp_r012_1kl_a1" } },
 	{ 3, { 0x13, 0x22, }, { "murata_mur_r013_1kl_b0" } },
 	{ 3, { 0x14, 0x22, }, { "murata_mur_r014_1kl_b0" } },
@@ -742,6 +743,8 @@ vid_info_t vid_info[] = {
 	{ 3, { 0x32, 0x22, }, { "murata_mur_r032_1kl_b0" } },
 	{ 3, { 0x33, 0x22, }, { "murata_mur_r033_1kl_b0" } },
 	{ 3, { 0x34, 0x22, }, { "murata_mur_r034_1kl_b0" } },
+	{ 3, { 0x50, 0x22, }, { "murata_mur_r020_1qw_b2" } },
+	{ 3, { 0x51, 0x22, }, { "murata_mur_r021_1qw_b2" } },
 	{ 0, { 0x00, }, { "samsung" } }           /* Default: Not specified yet */
 #endif /* SUPPORT_BCM4359_MIXED_MODULES */
 };

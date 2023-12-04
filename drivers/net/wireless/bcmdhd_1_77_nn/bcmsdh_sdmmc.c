@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Proprietary,Open:>>
  *
- * $Id: bcmsdh_sdmmc.c 717456 2017-08-24 08:10:17Z $
+ * $Id: bcmsdh_sdmmc.c 710913 2017-07-14 10:17:51Z $
  */
 #include <typedefs.h>
 
