@@ -281,23 +281,6 @@ static void sem_wait_array(struct sem_array *sma)
 }
 
 /*
- * Wait until all currently ongoing simple ops have completed.
- * Caller must own sem_perm.lock.
- * New simple ops cannot start, because simple ops first check
- * that sem_perm.lock is free.
- */
-static void sem_wait_array(struct sem_array *sma)
-{
-	int i;
-	struct sem *sem;
-
-	for (i = 0; i < sma->sem_nsems; i++) {
-		sem = sma->sem_base + i;
-		spin_unlock_wait(&sem->lock);
-	}
-}
-
-/*
  * If the request contains only one semaphore operation, and there are
  * no complex transactions pending, lock only the semaphore involved.
  * Otherwise, lock the entire semaphore array, since we either have
@@ -346,8 +329,13 @@ static inline int sem_lock(struct sem_array *sma, struct sembuf *sops,
 
 		/* Then check that the global lock is free */
 		if (!spin_is_locked(&sma->sem_perm.lock)) {
-			/* spin_is_locked() is not a memory barrier */
-			smp_mb();
+			/*
+			 * We need a memory barrier with acquire semantics,
+			 * otherwise we can race with another thread that does:
+			 *	complex_count++;
+			 *	spin_unlock(sem_perm.lock);
+			 */
+			ipc_smp_acquire__after_spin_is_unlocked();
 
 			/* Now repeat the test of complex_count:
 			 * It can't change anymore until we drop sem->lock.
