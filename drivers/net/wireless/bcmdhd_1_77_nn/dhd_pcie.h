@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_pcie.h 680277 2017-01-19 08:21:55Z $
+ * $Id: dhd_pcie.h 713501 2017-07-31 08:57:20Z $
  */
 
 
@@ -42,11 +42,12 @@
 #endif /* CONFIG_PCI_MSM */
 #endif /* CONFIG_ARCH_MSM */
 #ifdef EXYNOS_PCIE_LINKDOWN_RECOVERY
-#if defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895)
+#if defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895) || \
+	defined(CONFIG_SOC_EXYNOS9810)
 #include <linux/exynos-pci-noti.h>
 extern int exynos_pcie_register_event(struct exynos_pcie_register_event *reg);
 extern int exynos_pcie_deregister_event(struct exynos_pcie_register_event *reg);
-#endif /* CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 */
+#endif /* CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 || CONFIG_SOC_EXYNOS9810 */
 #endif /* EXYNOS_PCIE_LINKDOWN_RECOVERY */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
@@ -88,10 +89,11 @@ extern int exynos_pcie_deregister_event(struct exynos_pcie_register_event *reg);
 #define struct_pcie_register_event	struct msm_pcie_register_event
 #endif /* CONFIG_ARCH_MSM */
 #ifdef EXYNOS_PCIE_LINKDOWN_RECOVERY
-#if defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895)
+#if defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895) || \
+	defined(CONFIG_SOC_EXYNOS9810)
 #define struct_pcie_notify		struct exynos_pcie_notify
 #define struct_pcie_register_event	struct exynos_pcie_register_event
-#endif /* CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 */
+#endif /* CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 || CONFIG_SOC_EXYNOS9810 */
 #endif /* EXYNOS_PCIE_LINKDOWN_RECOVERY */
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
@@ -326,13 +328,14 @@ typedef struct dhd_bus {
 	bool	irq_registered;
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 #if defined(CONFIG_ARCH_MSM) || (defined(EXYNOS_PCIE_LINKDOWN_RECOVERY) && \
-	defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895))
+	defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895) || \
+	defined(CONFIG_SOC_EXYNOS9810))
 #ifdef CONFIG_ARCH_MSM
 	uint8 no_cfg_restore;
 #endif /* CONFIG_ARCH_MSM */
 	struct_pcie_register_event pcie_event;
 #endif /* CONFIG_ARCH_MSM || (EXYNOS_PCIE_LINKDOWN_RECOVERY &&
-	* (CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895))
+	* (CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 || CONFIG_SOC_EXYNOS9810))
 	*/
 	bool read_shm_fail;
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
@@ -388,6 +391,9 @@ typedef struct dhd_bus {
 #if defined(PCIE_OOB) || defined(PCIE_INB_DW)
 	bool  ds_enabled;
 #endif
+#ifdef DHD_PCIE_RUNTIMEPM
+	bool chk_pm;	/* To avoid counting of wake up from Runtime PM */
+#endif /* DHD_PCIE_RUNTIMEPM */
 } dhd_bus_t;
 
 /* function declarations */
@@ -452,16 +458,13 @@ extern void dhd_os_ib_set_device_wake(struct dhd_bus *bus, bool val);
 #if defined(CONFIG_MACH_UNIVERSAL5433)
 #define SAMSUNG_PCIE_DEVICE_ID 0xa5e3
 #define SAMSUNG_PCIE_CH_NUM
-#elif defined(CONFIG_MACH_UNIVERSAL7420)
+#elif defined(CONFIG_MACH_UNIVERSAL7420) || defined(CONFIG_SOC_EXYNOS7420)
 #define SAMSUNG_PCIE_DEVICE_ID 0xa575
 #define SAMSUNG_PCIE_CH_NUM 1
 #elif defined(CONFIG_SOC_EXYNOS8890)
 #define SAMSUNG_PCIE_DEVICE_ID 0xa544
 #define SAMSUNG_PCIE_CH_NUM 0
-#elif defined(CONFIG_SOC_EXYNOS7420)
-#define SAMSUNG_PCIE_DEVICE_ID 0xa575
-#define SAMSUNG_PCIE_CH_NUM 1
-#elif defined(CONFIG_SOC_EXYNOS8895)
+#elif defined(CONFIG_SOC_EXYNOS8895) || defined(CONFIG_SOC_EXYNOS9810)
 #define SAMSUNG_PCIE_DEVICE_ID 0xecec
 #define SAMSUNG_PCIE_CH_NUM 0
 #else
@@ -479,6 +482,8 @@ extern void dhd_os_ib_set_device_wake(struct dhd_bus *bus, bool val);
 #define MSM_PCIE_DEVICE_ID 0x0104
 #elif defined(CONFIG_ARCH_MSM8998)
 #define MSM_PCIE_DEVICE_ID 0x0105
+#elif defined(CONFIG_ARCH_SDM845)
+#define MSM_PCIE_DEVICE_ID 0x0106
 #else
 #error "Not supported platform"
 #endif

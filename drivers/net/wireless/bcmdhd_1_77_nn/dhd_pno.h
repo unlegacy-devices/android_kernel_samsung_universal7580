@@ -25,7 +25,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_pno.h 717454 2017-08-24 08:08:01Z $
+ * $Id: dhd_pno.h 707287 2017-06-27 06:44:29Z $
  */
 
 #ifndef __DHD_PNO_H__

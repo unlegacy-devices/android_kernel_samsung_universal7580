@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_pcie_linux.c 699311 2017-05-12 16:48:13Z $
+ * $Id: dhd_pcie_linux.c 713490 2017-07-31 07:27:48Z $
  */
 
 
@@ -272,6 +272,13 @@ static int dhdpcie_smmu_init(struct pci_dev *pdev, void *smmu_cxt)
 	}
 
 	DHD_ERROR(("%s : SMMU init start\n", __FUNCTION__));
+
+	if (dma_set_mask(&pdev->dev, DMA_BIT_MASK(64)) ||
+			dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(64))) {
+		DHD_ERROR(("%s: DMA set 64bit mask failed.\n", __func__));
+		return -EINVAL;
+	}
+
 	mapping = arm_iommu_create_mapping(&platform_bus_type,
 		smmu_info->smmu_iova_start, smmu_info->smmu_iova_len);
 	if (IS_ERR(mapping)) {
@@ -381,6 +388,7 @@ static int dhdpcie_pm_prepare(struct device *dev)
 		DHD_DISABLE_RUNTIME_PM(bus->dhd);
 	}
 
+	bus->chk_pm = TRUE;
 	return 0;
 }
 
@@ -403,8 +411,10 @@ static int dhdpcie_pm_resume(struct device *dev)
 	DHD_BUS_BUSY_SET_RESUME_IN_PROGRESS(bus->dhd);
 	DHD_GENERAL_UNLOCK(bus->dhd, flags);
 
-	if (!bus->dhd->dongle_reset)
+	if (!bus->dhd->dongle_reset) {
 		ret = dhdpcie_set_suspend_resume(bus, FALSE);
+		bus->chk_pm = FALSE;
+	}
 
 	DHD_GENERAL_LOCK(bus->dhd, flags);
 	DHD_BUS_BUSY_CLEAR_RESUME_IN_PROGRESS(bus->dhd);
@@ -931,9 +941,9 @@ dhdpcie_pci_remove(struct pci_dev *pdev)
 		msm_pcie_deregister_event(&bus->pcie_event);
 #endif /* CONFIG_ARCH_MSM */
 #ifdef EXYNOS_PCIE_LINKDOWN_RECOVERY
-#ifdef CONFIG_SOC_EXYNOS8890
+#if defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS9810)
 		exynos_pcie_deregister_event(&bus->pcie_event);
-#endif /* CONFIG_SOC_EXYNOS8890 */
+#endif /* CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS9810 */
 #endif /* EXYNOS_PCIE_LINKDOWN_RECOVERY */
 	}
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
@@ -1140,7 +1150,8 @@ int dhdpcie_scan_resource(dhdpcie_info_t *dhdpcie_info)
 
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 #if defined(CONFIG_ARCH_MSM) || (defined(EXYNOS_PCIE_LINKDOWN_RECOVERY) && \
-	(defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895)))
+	(defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895) || \
+	defined(CONFIG_SOC_EXYNOS9810)))
 void dhdpcie_linkdown_cb(struct_pcie_notify *noti)
 {
 	struct pci_dev *pdev = (struct pci_dev *)noti->user;
@@ -1170,7 +1181,7 @@ void dhdpcie_linkdown_cb(struct_pcie_notify *noti)
 
 }
 #endif /* CONFIG_ARCH_MSM || (EXYNOS_PCIE_LINKDOWN_RECOVERY &&
-	* (CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895))
+	* (CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 || CONFIG_SOC_EXYNOS9810))
 	*/
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
 
@@ -1833,6 +1844,15 @@ static irqreturn_t wlan_oob_irq(int irq, void *data)
 	DHD_TRACE(("%s: IRQ Triggered\n", __FUNCTION__));
 	bus = (dhd_bus_t *)data;
 	dhdpcie_oob_intr_set(bus, FALSE);
+#ifdef DHD_WAKE_STATUS
+#ifdef DHD_PCIE_RUNTIMEPM
+	/* This condition is for avoiding counting of wake up from Runtime PM */
+	if (bus->chk_pm)
+#endif /* DHD_PCIE_RUNTIMPM */
+	{
+		bcmpcie_set_get_wake(bus, 1);
+	}
+#endif /* DHD_WAKE_STATUS */
 #ifdef DHD_PCIE_RUNTIMEPM
 	dhdpcie_runtime_bus_wake(bus->dhd, FALSE, wlan_oob_irq);
 #endif /* DHD_PCIE_RUNTIMPM */

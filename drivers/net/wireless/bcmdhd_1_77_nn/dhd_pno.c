@@ -25,7 +25,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_pno.c 717454 2017-08-24 08:08:01Z $
+ * $Id: dhd_pno.c 707287 2017-06-27 06:44:29Z $
  */
 
 #if defined(GSCAN_SUPPORT) && !defined(PNO_SUPPORT)
@@ -55,6 +55,9 @@
 #ifdef GSCAN_SUPPORT
 #include <linux/gcd.h>
 #endif /* GSCAN_SUPPORT */
+#ifdef WL_CFG80211
+#include <wl_cfg80211.h>
+#endif /* WL_CFG80211 */
 
 #ifdef __BIG_ENDIAN
 #include <bcmendian.h>
