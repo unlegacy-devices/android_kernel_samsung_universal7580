@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: dhd_sdio.c 717423 2017-08-24 07:05:23Z $
+ * $Id: dhd_sdio.c 705650 2017-06-19 03:00:50Z $
  */
 
 #include <typedefs.h>
@@ -4855,8 +4855,10 @@ dhd_bus_stop(struct dhd_bus *bus, bool enforce_mutex)
 		 */
 		dhd_tcpack_info_tbl_clean(bus->dhd);
 #endif /* DHDTCPACK_SUPPRESS */
+		dhd_os_sdlock_txq(bus->dhd);
 		/* Clear the data packet queues */
 		pktq_flush(osh, &bus->txq, TRUE);
+		dhd_os_sdunlock_txq(bus->dhd);
 	}
 
 	/* Clear any held glomming stuff */

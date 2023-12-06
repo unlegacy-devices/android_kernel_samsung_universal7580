@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: wl_cfgvendor.c 717454 2017-08-24 08:08:01Z $
+ * $Id: wl_cfgvendor.c 710862 2017-07-14 07:43:59Z $
  */
 
 /*
@@ -82,6 +82,10 @@
 #include <dhd_wlfc.h>
 #endif
 #include <brcm_nl80211.h>
+
+#ifdef STAT_REPORT
+#include <wl_statreport.h>
+#endif
 
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 13, 0)) || defined(WL_VENDOR_EXT_SUPPORT)
 
@@ -2196,6 +2200,7 @@ static int wl_cfgvendor_lstats_get_info(struct wiphy *wiphy,
 	wifi_rate_stat *p_wifi_rate_stat = NULL;
 	uint total_len = 0;
 	wifi_iface_stat iface;
+	wlc_rev_info_t revinfo;
 #ifdef CONFIG_COMPAT
 	compat_wifi_iface_stat compat_iface;
 	int compat_task_state = is_compat_task();
@@ -2203,6 +2208,14 @@ static int wl_cfgvendor_lstats_get_info(struct wiphy *wiphy,
 
 	WL_INFORM(("%s: Enter \n", __func__));
 	RETURN_EIO_IF_NOT_UP(cfg);
+
+	/* Get the device rev info */
+	memset(&revinfo, 0, sizeof(revinfo));
+	err = wldev_ioctl_get(bcmcfg_to_prmry_ndev(cfg), WLC_GET_REVINFO, &revinfo,
+			sizeof(revinfo));
+	if (err != BCME_OK) {
+		goto exit;
+	}
 
 	outdata = (void *)kzalloc(WLC_IOCTL_MAXLEN, GFP_KERNEL);
 	if (outdata == NULL) {
@@ -2280,8 +2293,13 @@ static int wl_cfgvendor_lstats_get_info(struct wiphy *wiphy,
 	}
 
 	CHK_CNTBUF_DATALEN(iovar_buf, WLC_IOCTL_MAXLEN);
+
+#ifdef STAT_REPORT
+	wl_stat_report_gather(cfg, iovar_buf);
+#endif
+
 	/* Translate traditional (ver <= 10) counters struct to new xtlv type struct */
-	err = wl_cntbuf_to_xtlv_format(NULL, iovar_buf, WLC_IOCTL_MAXLEN, 0);
+	err = wl_cntbuf_to_xtlv_format(NULL, iovar_buf, WLC_IOCTL_MAXLEN, revinfo.corerev);
 	if (err != BCME_OK) {
 		WL_ERR(("%s wl_cntbuf_to_xtlv_format ERR %d\n",
 			__FUNCTION__, err));
@@ -3577,6 +3595,7 @@ static const struct  nl80211_vendor_cmd_info wl_vendor_events [] = {
 		{ OUI_BRCM, BRCM_VENDOR_EVENT_UNSPEC },
 		{ OUI_BRCM, BRCM_VENDOR_EVENT_PRIV_STR },
 #ifdef GSCAN_SUPPORT
+		{ OUI_GOOGLE, GOOGLE_GSCAN_SIGNIFICANT_EVENT },
 		{ OUI_GOOGLE, GOOGLE_GSCAN_GEOFENCE_FOUND_EVENT },
 		{ OUI_GOOGLE, GOOGLE_GSCAN_BATCH_SCAN_EVENT },
 		{ OUI_GOOGLE, GOOGLE_SCAN_FULL_RESULTS_EVENT },
